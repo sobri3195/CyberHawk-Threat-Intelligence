@@ -247,9 +247,37 @@ Untuk berkontribusi:
 
 Copyright © 2024 TNI AU - Threat Intelligence System
 
+## 👨‍💻 Author
+
+**Lettu Kes dr. Muhammad Sobri Maulana, S.Kom, CEH, OSCP, OSCE**
+
+Certified Ethical Hacker (CEH), Offensive Security Certified Professional (OSCP), dan Offensive Security Certified Expert (OSCE) dengan spesialisasi dalam cyber threat intelligence dan security analysis.
+
+### 📧 Contact
+
+- **Email**: [muhammadsobrimaulana31@gmail.com](mailto:muhammadsobrimaulana31@gmail.com)
+- **GitHub**: [github.com/sobri3195](https://github.com/sobri3195)
+- **YouTube**: [@muhammadsobrimaulana6013](https://www.youtube.com/@muhammadsobrimaulana6013)
+- **Telegram**: [@winlin_exploit](https://t.me/winlin_exploit)
+- **TikTok**: [@dr.sobri](https://www.tiktok.com/@dr.sobri)
+
+### 💬 Community
+
+**WhatsApp Group**: [Join Community](https://chat.whatsapp.com/B8nwRZOBMo64GjTwdXV8Bl)
+
+Bergabunglah dengan komunitas untuk diskusi tentang cyber security, threat intelligence, dan topik terkait keamanan siber lainnya.
+
+## 💝 Support This Project
+
+Jika project ini bermanfaat untuk Anda, dukung pengembangan lebih lanjut melalui donasi:
+
+**Donate**: [https://lynk.id/muhsobrimaulana](https://lynk.id/muhsobrimaulana)
+
+Dukungan Anda sangat berarti untuk pengembangan tools dan konten edukasi cyber security gratis untuk komunitas.
+
 ## 👥 Support
 
-Untuk pertanyaan dan dukungan, hubungi tim development.
+Untuk pertanyaan dan dukungan, hubungi tim development atau author melalui kontak di atas.
 
 ---
 
