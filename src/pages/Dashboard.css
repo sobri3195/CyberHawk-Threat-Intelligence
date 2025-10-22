@@ -1,0 +1,94 @@
+.dashboard {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.threat-table {
+  overflow-x: auto;
+}
+
+.threat-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.threat-table th {
+  text-align: left;
+  padding: 1rem;
+  background: rgba(51, 65, 85, 0.5);
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.threat-table td {
+  padding: 1rem;
+  border-top: 1px solid #334155;
+  color: #e2e8f0;
+}
+
+.threat-table tr:hover {
+  background: rgba(51, 65, 85, 0.3);
+}
+
+.threat-title {
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.threat-time {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.source-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  color: #94a3b8;
+}
+
+.error-container svg {
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .threat-table {
+    font-size: 0.875rem;
+  }
+
+  .threat-table th,
+  .threat-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
