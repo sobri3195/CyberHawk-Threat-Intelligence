@@ -1,0 +1,29 @@
+# TNI AU Threat Intelligence System - Python Dependencies
+# All features enabled with FREE API support
+
+# Core Dependencies
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Social Media APIs
+tweepy>=4.14.0
+praw>=7.7.0
+
+# Natural Language Processing
+textblob>=0.17.1
+nltk>=3.8.0
+
+# Data Analysis
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Database
+sqlite3; python_version >= '3.0'
+
+# Web Scraping (Optional - for advanced features)
+selenium>=4.15.0
+# chromedriver-autoinstaller>=0.6.0
+
+# Additional utilities
+python-dotenv>=1.0.0

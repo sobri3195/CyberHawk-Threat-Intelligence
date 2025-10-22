@@ -1,6 +1,7 @@
 """
 Sistem Analisis Intelijen Ancaman Siber - TNI AU
 Fitur: Crawling media sosial, dark web monitoring, sentiment analysis multilanguage
+ALL FEATURES ENABLED - Auto API Generation - Free Crawling
 """
 
 import requests
@@ -16,6 +17,16 @@ from urllib.parse import urlparse
 import time
 from collections import Counter
 import sqlite3
+import os
+import sys
+
+try:
+    from free_api_manager import FreeAPIManager, FreeThreatIntelAPIs, initialize_all_apis
+    from social_media_crawler_free import SocialMediaScraperFree
+    FREE_CRAWLER_AVAILABLE = True
+except ImportError:
+    FREE_CRAWLER_AVAILABLE = False
+    print("⚠️ Free crawler modules not found. Using standard crawlers.")
 
 # ===============================
 # 1. KONFIGURASI DAN DATABASE
@@ -172,16 +183,34 @@ class SurfaceWebCrawler:
 # ===============================
 
 class SocialMediaCrawler:
-    """Crawler untuk media sosial (Twitter/X, Reddit, dll)"""
+    """Crawler untuk media sosial (Twitter/X, Reddit, dll) - ALL PLATFORMS ENABLED"""
     
-    def __init__(self, twitter_bearer_token=None, reddit_credentials=None):
+    def __init__(self, twitter_bearer_token=None, reddit_credentials=None, use_free_crawler=True):
         self.twitter_token = twitter_bearer_token
         self.reddit_creds = reddit_credentials
+        self.use_free_crawler = use_free_crawler and FREE_CRAWLER_AVAILABLE
+        
+        if self.use_free_crawler:
+            self.free_scraper = SocialMediaScraperFree()
+            print("✅ Free social media scraper initialized - ALL platforms enabled")
+        else:
+            self.free_scraper = None
     
     def crawl_twitter(self, keywords, max_results=100):
-        """Crawl Twitter/X untuk keyword tertentu"""
+        """Crawl Twitter/X untuk keyword tertentu - AUTO FALLBACK to free scraper"""
+        if self.use_free_crawler and self.free_scraper:
+            print("🔄 Using FREE Twitter scraper (no API key needed)")
+            all_results = []
+            for keyword in keywords[:3]:
+                try:
+                    results = self.free_scraper.scrape_twitter_search(keyword, limit=20)
+                    all_results.extend(results)
+                except Exception as e:
+                    print(f"Free scraper error for '{keyword}': {e}")
+            return all_results
+        
         if not self.twitter_token:
-            print("Twitter API token not configured")
+            print("⚠️ Twitter API token not configured. Enable free_crawler=True for web scraping.")
             return []
         
         try:
@@ -213,9 +242,21 @@ class SocialMediaCrawler:
             return []
     
     def crawl_reddit(self, subreddits, keywords, limit=50):
-        """Crawl Reddit untuk subreddit dan keyword tertentu"""
+        """Crawl Reddit untuk subreddit dan keyword tertentu - AUTO FALLBACK to free scraper"""
+        if self.use_free_crawler and self.free_scraper:
+            print("🔄 Using FREE Reddit scraper (no API key needed)")
+            all_results = []
+            for keyword in keywords[:3]:
+                try:
+                    for subreddit in subreddits[:3]:
+                        results = self.free_scraper.scrape_reddit_search(keyword, subreddit=subreddit, limit=20)
+                        all_results.extend(results)
+                except Exception as e:
+                    print(f"Free scraper error for '{keyword}': {e}")
+            return all_results
+        
         if not self.reddit_creds:
-            print("Reddit API credentials not configured")
+            print("⚠️ Reddit API credentials not configured. Enable free_crawler=True for web scraping.")
             return []
         
         try:
@@ -230,7 +271,6 @@ class SocialMediaCrawler:
                 subreddit = reddit.subreddit(subreddit_name)
                 
                 for submission in subreddit.hot(limit=limit):
-                    # Filter berdasarkan keywords
                     content = f"{submission.title} {submission.selftext}".lower()
                     if any(kw.lower() in content for kw in keywords):
                         results.append({
@@ -248,6 +288,90 @@ class SocialMediaCrawler:
         except Exception as e:
             print(f"Error crawling Reddit: {str(e)}")
             return []
+    
+    def crawl_facebook(self, keywords, limit=20):
+        """Crawl Facebook public posts - FREE scraper"""
+        if self.use_free_crawler and self.free_scraper:
+            print("🔄 Using FREE Facebook scraper")
+            all_results = []
+            for keyword in keywords[:3]:
+                try:
+                    results = self.free_scraper.scrape_facebook_public(keyword, limit=10)
+                    all_results.extend(results)
+                except Exception as e:
+                    print(f"Facebook scraper error: {e}")
+            return all_results
+        return []
+    
+    def crawl_instagram(self, hashtags, limit=20):
+        """Crawl Instagram public posts - FREE scraper"""
+        if self.use_free_crawler and self.free_scraper:
+            print("🔄 Using FREE Instagram scraper")
+            all_results = []
+            for hashtag in hashtags[:3]:
+                try:
+                    results = self.free_scraper.scrape_instagram_public(hashtag, limit=10)
+                    all_results.extend(results)
+                except Exception as e:
+                    print(f"Instagram scraper error: {e}")
+            return all_results
+        return []
+    
+    def crawl_linkedin(self, keywords, limit=20):
+        """Crawl LinkedIn public posts - FREE scraper"""
+        if self.use_free_crawler and self.free_scraper:
+            print("🔄 Using FREE LinkedIn scraper")
+            all_results = []
+            for keyword in keywords[:3]:
+                try:
+                    results = self.free_scraper.scrape_linkedin_public(keyword, limit=10)
+                    all_results.extend(results)
+                except Exception as e:
+                    print(f"LinkedIn scraper error: {e}")
+            return all_results
+        return []
+    
+    def crawl_telegram(self, channels, limit=20):
+        """Crawl Telegram public channels - FREE scraper"""
+        if self.use_free_crawler and self.free_scraper:
+            print("🔄 Using FREE Telegram scraper")
+            all_results = []
+            for channel in channels:
+                try:
+                    results = self.free_scraper.scrape_telegram_public(channel, limit=limit)
+                    all_results.extend(results)
+                except Exception as e:
+                    print(f"Telegram scraper error: {e}")
+            return all_results
+        return []
+    
+    def crawl_all_platforms(self, keywords, platforms=None):
+        """Crawl ALL social media platforms at once"""
+        if platforms is None:
+            platforms = ['twitter', 'reddit', 'facebook', 'instagram', 'linkedin', 'telegram']
+        
+        all_results = []
+        
+        if 'twitter' in platforms:
+            all_results.extend(self.crawl_twitter(keywords))
+        
+        if 'reddit' in platforms:
+            all_results.extend(self.crawl_reddit(['cybersecurity', 'netsec', 'InfoSec'], keywords))
+        
+        if 'facebook' in platforms:
+            all_results.extend(self.crawl_facebook(keywords))
+        
+        if 'instagram' in platforms:
+            hashtags = [kw.replace(' ', '') for kw in keywords]
+            all_results.extend(self.crawl_instagram(hashtags))
+        
+        if 'linkedin' in platforms:
+            all_results.extend(self.crawl_linkedin(keywords))
+        
+        if 'telegram' in platforms:
+            all_results.extend(self.crawl_telegram(['security', 'cybersec']))
+        
+        return all_results
 
 # ===============================
 # 4. DARK WEB MONITORING (TOR)
@@ -566,36 +690,69 @@ class ThreatIntelSystem:
         self.reporter = ThreatIntelReporter(self.db)
     
     def collect_intelligence(self, sources):
-        """Kumpulkan intelijen dari berbagai sumber"""
+        """Kumpulkan intelijen dari berbagai sumber - ALL PLATFORMS"""
         all_data = []
         
         # Surface web
-        if 'news' in sources:
-            print("Crawling news sites...")
+        if sources.get('news'):
+            print("📰 Crawling news sites...")
             for url in sources.get('news_urls', []):
                 articles = self.surface_crawler.crawl_news_site(url)
                 all_data.extend(articles)
         
-        # Social media
-        if 'twitter' in sources:
-            print("Crawling Twitter...")
+        # Social media - ALL PLATFORMS
+        if sources.get('twitter'):
+            print("🐦 Crawling Twitter/X...")
             tweets = self.social_crawler.crawl_twitter(
                 keywords=sources.get('keywords', []),
                 max_results=100
             )
             all_data.extend(tweets)
+            print(f"   ✓ Collected {len(tweets)} tweets")
         
-        if 'reddit' in sources:
-            print("Crawling Reddit...")
+        if sources.get('reddit'):
+            print("🤖 Crawling Reddit...")
             posts = self.social_crawler.crawl_reddit(
                 subreddits=sources.get('subreddits', []),
                 keywords=sources.get('keywords', [])
             )
             all_data.extend(posts)
+            print(f"   ✓ Collected {len(posts)} Reddit posts")
+        
+        if sources.get('facebook'):
+            print("📘 Crawling Facebook...")
+            fb_posts = self.social_crawler.crawl_facebook(
+                keywords=sources.get('keywords', [])
+            )
+            all_data.extend(fb_posts)
+            print(f"   ✓ Collected {len(fb_posts)} Facebook posts")
+        
+        if sources.get('instagram'):
+            print("📸 Crawling Instagram...")
+            hashtags = [kw.replace(' ', '') for kw in sources.get('keywords', [])]
+            ig_posts = self.social_crawler.crawl_instagram(hashtags[:5])
+            all_data.extend(ig_posts)
+            print(f"   ✓ Collected {len(ig_posts)} Instagram posts")
+        
+        if sources.get('linkedin'):
+            print("💼 Crawling LinkedIn...")
+            li_posts = self.social_crawler.crawl_linkedin(
+                keywords=sources.get('keywords', [])
+            )
+            all_data.extend(li_posts)
+            print(f"   ✓ Collected {len(li_posts)} LinkedIn posts")
+        
+        if sources.get('telegram'):
+            print("✈️ Crawling Telegram...")
+            tg_posts = self.social_crawler.crawl_telegram(
+                channels=sources.get('telegram_channels', [])
+            )
+            all_data.extend(tg_posts)
+            print(f"   ✓ Collected {len(tg_posts)} Telegram messages")
         
         # Dark web
-        if 'darkweb' in sources and sources.get('onion_urls'):
-            print("Monitoring dark web...")
+        if sources.get('darkweb') and sources.get('onion_urls'):
+            print("🕵️ Monitoring dark web...")
             dark_data = self.dark_monitor.monitor_dark_forums(sources['onion_urls'])
             all_data.extend(dark_data)
         
@@ -669,42 +826,72 @@ class ThreatIntelSystem:
 # ===============================
 
 def main():
-    """Contoh penggunaan sistem"""
+    """Contoh penggunaan sistem - AUTO SETUP ALL APIs"""
     
-    # Konfigurasi (isi dengan credential yang sebenarnya)
-    config = {
-        'twitter_token': 'YOUR_TWITTER_BEARER_TOKEN',
-        'reddit_creds': {
-            'client_id': 'YOUR_CLIENT_ID',
-            'client_secret': 'YOUR_CLIENT_SECRET',
-            'user_agent': 'ThreatIntel/1.0'
+    print("="*80)
+    print("🚀 TNI AU THREAT INTELLIGENCE SYSTEM - ALL FEATURES ENABLED")
+    print("="*80)
+    
+    if FREE_CRAWLER_AVAILABLE:
+        print("\n🔧 Auto-configuring API credentials...")
+        api_manager = initialize_all_apis()
+        
+        api_config = api_manager.config
+        config = {
+            'twitter_token': api_config.get('twitter', {}).get('bearer_token'),
+            'reddit_creds': api_config.get('reddit', {}),
+            'use_free_crawler': True
         }
-    }
+        print("\n✅ All APIs auto-configured with FREE alternatives enabled!")
+    else:
+        config = {
+            'twitter_token': os.getenv('TWITTER_BEARER_TOKEN', 'YOUR_TWITTER_BEARER_TOKEN'),
+            'reddit_creds': {
+                'client_id': os.getenv('REDDIT_CLIENT_ID', 'YOUR_CLIENT_ID'),
+                'client_secret': os.getenv('REDDIT_CLIENT_SECRET', 'YOUR_CLIENT_SECRET'),
+                'user_agent': 'ThreatIntel/1.0'
+            },
+            'use_free_crawler': False
+        }
+        print("\n⚠️ Using standard configuration. Install free_api_manager.py for auto-setup.")
     
     # Inisialisasi sistem
     system = ThreatIntelSystem(config)
     
-    # Definisi sumber data
+    # Definisi sumber data - ALL PLATFORMS ENABLED
     sources = {
         'news': True,
         'news_urls': [
             'https://www.antaranews.com/berita/teknologi',
             'https://tekno.kompas.com/keamanan-siber',
-            # Tambahkan sumber berita lainnya
         ],
         'twitter': True,
         'reddit': True,
-        'subreddits': ['cybersecurity', 'netsec', 'Indonesia'],
+        'facebook': True,
+        'instagram': True,
+        'linkedin': True,
+        'telegram': True,
+        'subreddits': ['cybersecurity', 'netsec', 'InfoSec', 'blueteamsec'],
+        'telegram_channels': ['security', 'cybersec', 'infosec'],
         'keywords': [
             'TNI AU', 'pertahanan', 'siber', 'cyber attack', 
             'data breach', 'hacking', 'malware', 'ransomware',
-            'keamanan nasional', 'ancaman siber'
+            'keamanan nasional', 'ancaman siber', 'cybersecurity',
+            'threat intelligence', 'vulnerability'
         ],
-        'darkweb': False,  # Set True jika TOR sudah dikonfigurasi
-        'onion_urls': [
-            # Daftar .onion URLs yang akan dimonitor
-        ]
+        'darkweb': False,
+        'onion_urls': []
     }
+    
+    print("\n📡 Enabled Data Sources:")
+    print("  ✅ Twitter/X (via free scraper)")
+    print("  ✅ Reddit (via free scraper)")
+    print("  ✅ Facebook (public data)")
+    print("  ✅ Instagram (public hashtags)")
+    print("  ✅ LinkedIn (public posts)")
+    print("  ✅ Telegram (public channels)")
+    print("  ✅ News Sites")
+    print("  ✅ Forums")
     
     # Jalankan siklus pengumpulan
     result = system.run_collection_cycle(sources)

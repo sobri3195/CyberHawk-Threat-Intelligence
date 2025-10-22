@@ -1,0 +1,53 @@
+{
+  "system": {
+    "name": "TNI AU Threat Intelligence",
+    "version": "2.0.0",
+    "mode": "free_scraping"
+  },
+  "sources": {
+    "twitter": {
+      "enabled": true,
+      "method": "nitter_scraping",
+      "rate_limit": "moderate"
+    },
+    "reddit": {
+      "enabled": true,
+      "method": "json_api",
+      "rate_limit": "unlimited"
+    },
+    "facebook": {
+      "enabled": true,
+      "method": "web_scraping",
+      "rate_limit": "limited"
+    },
+    "instagram": {
+      "enabled": true,
+      "method": "picuki_scraping",
+      "rate_limit": "moderate"
+    },
+    "linkedin": {
+      "enabled": true,
+      "method": "web_scraping",
+      "rate_limit": "limited"
+    },
+    "telegram": {
+      "enabled": true,
+      "method": "web_interface",
+      "rate_limit": "unlimited"
+    }
+  },
+  "keywords": [
+    "TNI AU",
+    "pertahanan",
+    "siber",
+    "cyber attack",
+    "data breach",
+    "hacking",
+    "malware",
+    "ransomware",
+    "keamanan nasional",
+    "ancaman siber",
+    "cybersecurity",
+    "threat intelligence"
+  ]
+}
