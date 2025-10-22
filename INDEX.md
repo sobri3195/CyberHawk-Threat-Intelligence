@@ -63,6 +63,21 @@ Selamat datang di TNI AU Threat Intelligence System! Pilih dokumentasi sesuai ke
    - Upcoming features
    - Breaking changes
 
+## 🔧 Technical Documentation
+
+9. **[SCRAPING_STATUS.md](SCRAPING_STATUS.md)** 🛠️
+   - Social media scraping status
+   - Error handling guide (403/404)
+   - Platform availability
+   - Troubleshooting guide
+   - Alternative solutions
+
+10. **[AUTO_SETUP_GUIDE.md](AUTO_SETUP_GUIDE.md)** ⚙️
+    - Auto API configuration
+    - Free scraping setup
+    - Platform-specific guides
+    - Zero-config deployment
+
 ## 🗂️ File Structure
 
 ```
@@ -70,12 +85,14 @@ Documentation/
 ├── INDEX.md              ← You are here
 ├── QUICK_START.md        ← Start here if new
 ├── README.md             ← Main documentation
-├── DEMO.md              ← For presentations
-├── FEATURES.md          ← Feature details
-├── DEVELOPMENT.md       ← For developers
-├── API.md               ← API reference
-├── PROJECT_SUMMARY.md   ← Project overview
-└── CHANGELOG.md         ← Version history
+├── DEMO.md               ← For presentations
+├── FEATURES.md           ← Feature details
+├── DEVELOPMENT.md        ← For developers
+├── API.md                ← API reference
+├── PROJECT_SUMMARY.md    ← Project overview
+├── CHANGELOG.md          ← Version history
+├── SCRAPING_STATUS.md    ← Scraping status & error handling
+└── AUTO_SETUP_GUIDE.md   ← Auto-configuration guide
 ```
 
 ## 🎯 Quick Navigation by Role
@@ -170,6 +187,7 @@ Documentation/
 ### Troubleshooting
 - QUICK_START.md → Troubleshooting section
 - README.md → Common issues
+- SCRAPING_STATUS.md → Scraping errors (403/404)
 - DEVELOPMENT.md → Debug guide
 
 ## 💡 Pro Tips
@@ -189,8 +207,8 @@ Documentation/
 
 ## 📊 Documentation Statistics
 
-- **Total Documents**: 9 files
-- **Total Pages**: ~80 pages equivalent
+- **Total Documents**: 11 files
+- **Total Pages**: ~100 pages equivalent
 - **Read Time**: 2-3 hours (complete)
 - **Quick Start**: 15 minutes
 - **Languages**: English & Bahasa Indonesia

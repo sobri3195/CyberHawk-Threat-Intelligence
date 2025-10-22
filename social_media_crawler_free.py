@@ -71,47 +71,63 @@ class SocialMediaScraperFree:
     
     def scrape_twitter_search(self, keyword: str, limit: int = 20) -> List[Dict]:
         """
-        Scrape Twitter/X using Nitter instances (Twitter frontend without API)
-        Nitter is a free and open source alternative Twitter front-end
+        Scrape Twitter/X using alternative frontends
+        Note: Many Twitter frontends are frequently blocked or go offline
         """
         results = []
-        nitter_instances = [
-            'https://nitter.net',
-            'https://nitter.privacydev.net',
-            'https://nitter.poast.org'
+        
+        twitter_alternatives = [
+            {
+                'name': 'xcancel',
+                'base_url': 'https://xcancel.com',
+                'search_path': '/search',
+                'params': {'q': keyword, 'f': 'live'}
+            },
+            {
+                'name': 'nitter.cz',
+                'base_url': 'https://nitter.cz',
+                'search_path': '/search',
+                'params': {'f': 'tweets', 'q': keyword}
+            },
+            {
+                'name': 'nitter.poast.org',
+                'base_url': 'https://nitter.poast.org',
+                'search_path': '/search',
+                'params': {'f': 'tweets', 'q': keyword}
+            }
         ]
         
-        for instance in nitter_instances:
+        for alt in twitter_alternatives:
             try:
-                search_url = f"{instance}/search?f=tweets&q={quote_plus(keyword)}"
-                logger.info(f"Searching Twitter via {instance} for: {keyword}")
+                search_url = f"{alt['base_url']}{alt['search_path']}"
+                logger.info(f"Searching Twitter via {alt['name']} for: {keyword}")
                 
-                response = self.session.get(search_url, timeout=10)
+                response = self.session.get(search_url, params=alt['params'], timeout=10)
+                
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.content, 'html.parser')
                     
-                    tweets = soup.find_all('div', class_='timeline-item', limit=limit)
+                    tweets = soup.find_all(['div', 'article'], 
+                                          class_=re.compile('timeline-item|tweet|status'), 
+                                          limit=limit)
                     
                     for tweet in tweets:
                         try:
-                            username_elem = tweet.find('a', class_='username')
-                            content_elem = tweet.find('div', class_='tweet-content')
-                            date_elem = tweet.find('span', class_='tweet-date')
-                            stats = tweet.find('div', class_='tweet-stats')
+                            username_elem = tweet.find(['a', 'span'], class_=re.compile('username|author'))
+                            content_elem = tweet.find(['div', 'p'], class_=re.compile('tweet-content|content|text'))
+                            date_elem = tweet.find(['span', 'time'], class_=re.compile('tweet-date|date|time'))
                             
-                            if content_elem:
+                            if content_elem and content_elem.get_text(strip=True):
                                 tweet_data = {
                                     'source': 'twitter',
                                     'platform': 'Twitter/X',
                                     'author': username_elem.text.strip() if username_elem else 'Unknown',
                                     'content': content_elem.get_text(strip=True),
                                     'timestamp': date_elem.text.strip() if date_elem else datetime.now().isoformat(),
-                                    'url': instance + username_elem['href'] if username_elem else '',
-                                    'engagement': {
-                                        'raw': stats.get_text(strip=True) if stats else 'N/A'
-                                    },
+                                    'url': f"{alt['base_url']}/search?q={quote_plus(keyword)}",
                                     'collected_at': datetime.now().isoformat(),
-                                    'method': 'web_scraping'
+                                    'method': f'web_scraping_{alt["name"]}',
+                                    'note': 'Scraped from Twitter alternative frontend'
                                 }
                                 results.append(tweet_data)
                         except Exception as e:
@@ -119,58 +135,150 @@ class SocialMediaScraperFree:
                             continue
                     
                     if results:
+                        logger.info(f"Successfully collected tweets from {alt['name']}")
                         break
+                elif response.status_code == 403:
+                    logger.warning(f"{alt['name']} returned 403 Forbidden - may be rate limited")
+                elif response.status_code == 404:
+                    logger.warning(f"{alt['name']} returned 404 Not Found - endpoint may have changed")
+                else:
+                    logger.warning(f"{alt['name']} returned status code {response.status_code}")
                         
+            except requests.exceptions.ConnectionError:
+                logger.warning(f"Connection error for {alt['name']} - server may be down")
+                continue
+            except requests.exceptions.Timeout:
+                logger.warning(f"Timeout accessing {alt['name']}")
+                continue
             except Exception as e:
-                logger.warning(f"Error accessing {instance}: {e}")
+                logger.warning(f"Error accessing {alt['name']}: {type(e).__name__}")
                 continue
             
             self._random_delay()
+        
+        if not results:
+            logger.warning(f"Could not collect tweets for '{keyword}' - all sources failed or returned errors")
+            results.append({
+                'source': 'twitter',
+                'platform': 'Twitter/X',
+                'content': f'[Twitter scraping unavailable - keyword: {keyword}]',
+                'note': 'Twitter frontends are currently unavailable or blocked. Consider using official Twitter API.',
+                'timestamp': datetime.now().isoformat(),
+                'collected_at': datetime.now().isoformat(),
+                'method': 'fallback_placeholder',
+                'status': 'unavailable'
+            })
         
         logger.info(f"Collected {len(results)} tweets for '{keyword}'")
         return results
     
     def scrape_reddit_search(self, keyword: str, subreddit: Optional[str] = None, limit: int = 20) -> List[Dict]:
         """
-        Scrape Reddit using old.reddit.com (no API required)
+        Scrape Reddit with better error handling and fallback strategies
         """
         results = []
         
-        try:
-            if subreddit:
-                search_url = f"https://old.reddit.com/r/{subreddit}/search.json?q={quote_plus(keyword)}&restrict_sr=on&limit={limit}"
-            else:
-                search_url = f"https://old.reddit.com/search.json?q={quote_plus(keyword)}&limit={limit}"
-            
-            logger.info(f"Searching Reddit for: {keyword}")
-            
-            response = self.session.get(search_url, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
+        methods = []
+        if subreddit:
+            methods = [
+                f"https://www.reddit.com/r/{subreddit}/search.json?q={quote_plus(keyword)}&restrict_sr=on&limit={limit}",
+                f"https://old.reddit.com/r/{subreddit}/search.json?q={quote_plus(keyword)}&restrict_sr=on&limit={limit}",
+                f"https://www.reddit.com/r/{subreddit}/hot.json?limit={limit}"
+            ]
+        else:
+            methods = [
+                f"https://www.reddit.com/search.json?q={quote_plus(keyword)}&limit={limit}",
+                f"https://old.reddit.com/search.json?q={quote_plus(keyword)}&limit={limit}",
+                f"https://www.reddit.com/r/all/search.json?q={quote_plus(keyword)}&limit={limit}"
+            ]
+        
+        logger.info(f"Searching Reddit for: {keyword}")
+        
+        for i, search_url in enumerate(methods):
+            try:
+                custom_headers = self.session.headers.copy()
+                custom_headers.update({
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'application/json, text/html, */*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': 'https://www.reddit.com/',
+                    'DNT': '1',
+                    'Sec-Fetch-Dest': 'empty',
+                    'Sec-Fetch-Mode': 'cors',
+                    'Sec-Fetch-Site': 'same-origin'
+                })
                 
-                for post in data.get('data', {}).get('children', []):
+                response = self.session.get(search_url, headers=custom_headers, timeout=10)
+                
+                if response.status_code == 200:
                     try:
-                        post_data = post.get('data', {})
-                        results.append({
-                            'source': 'reddit',
-                            'platform': 'Reddit',
-                            'subreddit': post_data.get('subreddit', ''),
-                            'author': post_data.get('author', 'Unknown'),
-                            'title': post_data.get('title', ''),
-                            'content': post_data.get('selftext', ''),
-                            'url': f"https://reddit.com{post_data.get('permalink', '')}",
-                            'score': post_data.get('score', 0),
-                            'num_comments': post_data.get('num_comments', 0),
-                            'timestamp': datetime.fromtimestamp(post_data.get('created_utc', 0)).isoformat(),
-                            'collected_at': datetime.now().isoformat(),
-                            'method': 'api_json'
-                        })
-                    except Exception as e:
-                        logger.debug(f"Error parsing Reddit post: {e}")
+                        data = response.json()
+                        
+                        for post in data.get('data', {}).get('children', []):
+                            try:
+                                post_data = post.get('data', {})
+                                content = post_data.get('selftext', '')
+                                title = post_data.get('title', '')
+                                
+                                if title or content:
+                                    results.append({
+                                        'source': 'reddit',
+                                        'platform': 'Reddit',
+                                        'subreddit': post_data.get('subreddit', ''),
+                                        'author': post_data.get('author', 'Unknown'),
+                                        'title': title,
+                                        'content': content,
+                                        'url': f"https://reddit.com{post_data.get('permalink', '')}",
+                                        'score': post_data.get('score', 0),
+                                        'num_comments': post_data.get('num_comments', 0),
+                                        'timestamp': datetime.fromtimestamp(post_data.get('created_utc', 0)).isoformat(),
+                                        'collected_at': datetime.now().isoformat(),
+                                        'method': 'reddit_json_api'
+                                    })
+                            except Exception as e:
+                                logger.debug(f"Error parsing Reddit post: {e}")
+                                continue
+                        
+                        if results:
+                            logger.info(f"Successfully collected Reddit posts using method {i+1}")
+                            break
+                    except json.JSONDecodeError:
+                        logger.warning(f"Reddit returned non-JSON response (method {i+1})")
                         continue
                         
-        except Exception as e:
-            logger.error(f"Error scraping Reddit: {e}")
+                elif response.status_code == 403:
+                    logger.warning(f"Reddit returned 403 Forbidden (method {i+1}) - may be rate limited or blocked")
+                elif response.status_code == 404:
+                    logger.warning(f"Reddit returned 404 Not Found (method {i+1})")
+                else:
+                    logger.warning(f"Reddit returned status code {response.status_code} (method {i+1})")
+                    
+            except requests.exceptions.ConnectionError as e:
+                logger.warning(f"Connection error for Reddit (method {i+1})")
+                continue
+            except requests.exceptions.Timeout:
+                logger.warning(f"Timeout accessing Reddit (method {i+1})")
+                continue
+            except Exception as e:
+                logger.warning(f"Error scraping Reddit (method {i+1}): {type(e).__name__}")
+                continue
+            
+            if i < len(methods) - 1:
+                self._random_delay(1, 2)
+        
+        if not results:
+            logger.warning(f"Could not collect Reddit posts for '{keyword}' - all methods failed")
+            results.append({
+                'source': 'reddit',
+                'platform': 'Reddit',
+                'title': f'Reddit scraping unavailable',
+                'content': f'[Reddit API blocked or rate limited - keyword: {keyword}]',
+                'note': 'Reddit is blocking scraping attempts. Consider using PRAW with authentication or wait before retrying.',
+                'timestamp': datetime.now().isoformat(),
+                'collected_at': datetime.now().isoformat(),
+                'method': 'fallback_placeholder',
+                'status': 'unavailable'
+            })
         
         logger.info(f"Collected {len(results)} Reddit posts for '{keyword}'")
         return results
@@ -189,6 +297,7 @@ class SocialMediaScraperFree:
             search_url = f"https://www.facebook.com/public?query={quote_plus(keyword)}&type=pages"
             
             response = self.session.get(search_url, timeout=10)
+            
             if response.status_code == 200:
                 soup = BeautifulSoup(response.content, 'html.parser')
                 
@@ -202,48 +311,161 @@ class SocialMediaScraperFree:
                     'collected_at': datetime.now().isoformat(),
                     'method': 'limited_scraping'
                 })
+            elif response.status_code == 403:
+                logger.warning(f"Facebook returned 403 Forbidden")
+                results.append({
+                    'source': 'facebook',
+                    'platform': 'Facebook',
+                    'content': f'[Facebook scraping blocked - keyword: {keyword}]',
+                    'note': 'Facebook blocked the request (403 Forbidden). Authentication required.',
+                    'timestamp': datetime.now().isoformat(),
+                    'collected_at': datetime.now().isoformat(),
+                    'method': 'fallback_placeholder',
+                    'status': 'blocked'
+                })
+            elif response.status_code == 404:
+                logger.warning(f"Facebook returned 404 Not Found")
+                results.append({
+                    'source': 'facebook',
+                    'platform': 'Facebook',
+                    'content': f'[Facebook endpoint not found - keyword: {keyword}]',
+                    'note': 'Facebook endpoint not found (404). API may have changed.',
+                    'timestamp': datetime.now().isoformat(),
+                    'collected_at': datetime.now().isoformat(),
+                    'method': 'fallback_placeholder',
+                    'status': 'not_found'
+                })
+            else:
+                logger.warning(f"Facebook returned status code {response.status_code}")
+                results.append({
+                    'source': 'facebook',
+                    'platform': 'Facebook',
+                    'content': f'[Facebook scraping failed - status {response.status_code}]',
+                    'note': f'Facebook returned unexpected status code: {response.status_code}',
+                    'timestamp': datetime.now().isoformat(),
+                    'collected_at': datetime.now().isoformat(),
+                    'method': 'fallback_placeholder',
+                    'status': 'error'
+                })
                 
+        except requests.exceptions.ConnectionError:
+            logger.error(f"Connection error for Facebook")
+            results.append({
+                'source': 'facebook',
+                'platform': 'Facebook',
+                'content': f'[Facebook connection error]',
+                'note': 'Could not connect to Facebook servers',
+                'timestamp': datetime.now().isoformat(),
+                'collected_at': datetime.now().isoformat(),
+                'method': 'fallback_placeholder',
+                'status': 'connection_error'
+            })
         except Exception as e:
-            logger.error(f"Error scraping Facebook: {e}")
+            logger.error(f"Error scraping Facebook: {type(e).__name__}")
+            results.append({
+                'source': 'facebook',
+                'platform': 'Facebook',
+                'content': f'[Facebook scraping error]',
+                'note': f'Error: {type(e).__name__}',
+                'timestamp': datetime.now().isoformat(),
+                'collected_at': datetime.now().isoformat(),
+                'method': 'fallback_placeholder',
+                'status': 'error'
+            })
         
         return results
     
     def scrape_instagram_public(self, hashtag: str, limit: int = 10) -> List[Dict]:
         """
-        Scrape public Instagram posts using Picuki or similar frontend
+        Scrape public Instagram posts with multiple fallback services
         """
         results = []
         
         logger.info(f"Searching Instagram for: #{hashtag}")
         
-        try:
-            search_url = f"https://www.picuki.com/tag/{hashtag}"
+        instagram_alternatives = [
+            {
+                'name': 'picuki',
+                'url': f"https://www.picuki.com/tag/{hashtag}",
+                'selector': 'div.box-photo'
+            },
+            {
+                'name': 'imginn',
+                'url': f"https://imginn.com/tag/{hashtag}/",
+                'selector': 'div.post'
+            },
+            {
+                'name': 'bibliogram',
+                'url': f"https://bibliogram.art/u/{hashtag}",
+                'selector': 'article'
+            }
+        ]
+        
+        for alt in instagram_alternatives:
+            try:
+                response = self.session.get(alt['url'], timeout=10)
+                
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.content, 'html.parser')
+                    
+                    posts = soup.find_all(['div', 'article'], 
+                                         class_=re.compile('box-photo|post|item'), 
+                                         limit=limit)
+                    
+                    for post in posts:
+                        try:
+                            description = post.find(['div', 'p'], class_=re.compile('description|caption|text'))
+                            
+                            if description:
+                                results.append({
+                                    'source': 'instagram',
+                                    'platform': 'Instagram',
+                                    'hashtag': hashtag,
+                                    'content': description.get_text(strip=True),
+                                    'timestamp': datetime.now().isoformat(),
+                                    'collected_at': datetime.now().isoformat(),
+                                    'method': f'web_scraping_{alt["name"]}'
+                                })
+                        except Exception as e:
+                            logger.debug(f"Error parsing Instagram post: {e}")
+                            continue
+                    
+                    if results:
+                        logger.info(f"Successfully collected Instagram posts from {alt['name']}")
+                        break
+                        
+                elif response.status_code == 403:
+                    logger.warning(f"{alt['name']} returned 403 Forbidden")
+                elif response.status_code == 404:
+                    logger.warning(f"{alt['name']} returned 404 Not Found")
+                else:
+                    logger.warning(f"{alt['name']} returned status code {response.status_code}")
+                        
+            except requests.exceptions.ConnectionError:
+                logger.warning(f"Connection error for {alt['name']}")
+                continue
+            except requests.exceptions.Timeout:
+                logger.warning(f"Timeout accessing {alt['name']}")
+                continue
+            except Exception as e:
+                logger.warning(f"Error accessing {alt['name']}: {type(e).__name__}")
+                continue
             
-            response = self.session.get(search_url, timeout=10)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.content, 'html.parser')
-                
-                posts = soup.find_all('div', class_='box-photo', limit=limit)
-                
-                for post in posts:
-                    try:
-                        description = post.find('div', class_='photo-description')
-                        
-                        results.append({
-                            'source': 'instagram',
-                            'platform': 'Instagram',
-                            'hashtag': hashtag,
-                            'content': description.get_text(strip=True) if description else '',
-                            'timestamp': datetime.now().isoformat(),
-                            'collected_at': datetime.now().isoformat(),
-                            'method': 'web_scraping'
-                        })
-                    except Exception as e:
-                        logger.debug(f"Error parsing Instagram post: {e}")
-                        continue
-                        
-        except Exception as e:
-            logger.error(f"Error scraping Instagram: {e}")
+            self._random_delay()
+        
+        if not results:
+            logger.warning(f"Could not collect Instagram posts for #{hashtag} - all sources failed")
+            results.append({
+                'source': 'instagram',
+                'platform': 'Instagram',
+                'hashtag': hashtag,
+                'content': f'[Instagram scraping unavailable - hashtag: #{hashtag}]',
+                'note': 'Instagram frontends are currently unavailable or blocked. Consider using official Instagram API.',
+                'timestamp': datetime.now().isoformat(),
+                'collected_at': datetime.now().isoformat(),
+                'method': 'fallback_placeholder',
+                'status': 'unavailable'
+            })
         
         logger.info(f"Collected {len(results)} Instagram posts for #{hashtag}")
         return results

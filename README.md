@@ -5,7 +5,8 @@
 Sistem Analisis Intelijen Ancaman Siber berbasis React.js untuk TNI AU dengan fitur crawling multi-bahasa, analisis sentimen real-time, dan **AUTO-SETUP untuk SEMUA platform media sosial TANPA API KEY!**
 
 > 🎉 **NEW!** All social media platforms enabled with FREE scraping - NO API keys required!  
-> 📚 **Documentation?** Check [INDEX.md](INDEX.md) or [AUTO_SETUP_GUIDE.md](AUTO_SETUP_GUIDE.md)  
+> ✅ **FIXED!** Improved error handling for 404/403 errors - graceful fallbacks implemented!  
+> 📚 **Documentation?** Check [INDEX.md](INDEX.md) or [SCRAPING_STATUS.md](SCRAPING_STATUS.md)  
 > ⚡ **Quick start?** Run `python quick_start.py` for instant setup!
 
 ## ✨ Fitur Utama
@@ -242,6 +243,48 @@ npm run preview
 2. **Integrasi Real**: Untuk crawling real-time, perlu API keys dari platform (Twitter, Reddit, dll)
 3. **Dark Web**: Monitoring dark web memerlukan Tor proxy (socks5h://localhost:9050)
 4. **Database**: Untuk production, integrasikan dengan database (SQLite/PostgreSQL)
+
+## 🔧 Error Handling & Troubleshooting
+
+### Improved Error Handling (v2.0)
+
+The system now includes robust error handling for common scraping issues:
+
+- **403 Forbidden**: Gracefully handled with fallback mechanisms
+- **404 Not Found**: Logged with informative messages and alternative attempts
+- **Connection Errors**: Automatic retry with alternative sources
+- **Rate Limiting**: Built-in delays and smart backoff strategies
+
+### Testing Error Handling
+
+Run the test script to verify error handling:
+```bash
+python test_scraping_errors.py
+```
+
+### Scraping Status
+
+For detailed information about platform availability and troubleshooting:
+```bash
+cat SCRAPING_STATUS.md
+```
+
+Or check: [SCRAPING_STATUS.md](SCRAPING_STATUS.md)
+
+### Known Limitations
+
+- Many social media platforms block scraping (403/404 errors are expected)
+- Reddit and Twitter frontends frequently change or go offline
+- Instagram/Facebook require authentication for detailed data
+- Telegram public channels work reliably
+
+### Recommendations for Production
+
+1. **Use Official APIs**: For reliable data collection, use authenticated APIs
+2. **Monitor Logs**: Check logs regularly for error patterns
+3. **Implement Caching**: Reduce redundant requests
+4. **Rotate IPs/Proxies**: Avoid rate limiting and IP blocks
+5. **Review SCRAPING_STATUS.md**: Stay updated on platform availability
 
 ## 🔐 Security Considerations
 

@@ -1,39 +1,39 @@
 {
   "twitter": {
-    "bearer_token": "DEMO_TWITTER_83d445bdb7514a22323f9a44803d7ec6",
+    "bearer_token": "DEMO_TWITTER_06fb9d5070e10353522fcd97fa9f5b3b",
     "type": "demo",
     "use_scraping": true,
-    "created_at": "2025-10-22T23:21:26.500125",
+    "created_at": "2025-10-22T23:33:23.892701",
     "note": "Using web scraping fallback"
   },
   "reddit": {
-    "client_id": "DmMuyhAfpzPxmm",
-    "client_secret": "F9D7EPtgEERAsjc0KDlwwIDRq9p",
+    "client_id": "PaPQWpOXiLKjWT",
+    "client_secret": "wpq77szir24x01jR5kKIJTR37w4",
     "user_agent": "TNI-AU-ThreatIntel/1.0",
     "type": "demo",
     "use_scraping": true,
-    "created_at": "2025-10-22T23:21:26.500384",
+    "created_at": "2025-10-22T23:33:23.892960",
     "note": "Using web scraping fallback"
   },
   "facebook": {
-    "access_token": "DEMO_FACEBOOK_0cf8c56ad3f471e6878b89521bb04908",
+    "access_token": "DEMO_FACEBOOK_5c1bba222145d849e3dd98593ed4d653",
     "type": "demo",
     "use_scraping": true,
-    "created_at": "2025-10-22T23:21:26.500899",
+    "created_at": "2025-10-22T23:33:23.893267",
     "note": "Using web scraping fallback"
   },
   "instagram": {
-    "access_token": "DEMO_INSTAGRAM_431887d39df26dfcf049f471c8ee5ee2",
+    "access_token": "DEMO_INSTAGRAM_17c9cdaa147b9b33542de868712509f6",
     "type": "demo",
     "use_scraping": true,
-    "created_at": "2025-10-22T23:21:26.501100",
+    "created_at": "2025-10-22T23:33:23.893479",
     "note": "Using web scraping fallback"
   },
   "linkedin": {
-    "access_token": "DEMO_LINKEDIN_c60a0ad817d0fa746803491be5d9d260",
+    "access_token": "DEMO_LINKEDIN_5558fb42094c18cb1e5c3238afc02468",
     "type": "demo",
     "use_scraping": true,
-    "created_at": "2025-10-22T23:21:26.501298",
+    "created_at": "2025-10-22T23:33:23.893677",
     "note": "Using web scraping fallback"
   },
   "threat_intel_apis": {
