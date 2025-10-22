@@ -1,0 +1,81 @@
+{
+  "twitter": {
+    "bearer_token": "DEMO_TWITTER_83d445bdb7514a22323f9a44803d7ec6",
+    "type": "demo",
+    "use_scraping": true,
+    "created_at": "2025-10-22T23:21:26.500125",
+    "note": "Using web scraping fallback"
+  },
+  "reddit": {
+    "client_id": "DmMuyhAfpzPxmm",
+    "client_secret": "F9D7EPtgEERAsjc0KDlwwIDRq9p",
+    "user_agent": "TNI-AU-ThreatIntel/1.0",
+    "type": "demo",
+    "use_scraping": true,
+    "created_at": "2025-10-22T23:21:26.500384",
+    "note": "Using web scraping fallback"
+  },
+  "facebook": {
+    "access_token": "DEMO_FACEBOOK_0cf8c56ad3f471e6878b89521bb04908",
+    "type": "demo",
+    "use_scraping": true,
+    "created_at": "2025-10-22T23:21:26.500899",
+    "note": "Using web scraping fallback"
+  },
+  "instagram": {
+    "access_token": "DEMO_INSTAGRAM_431887d39df26dfcf049f471c8ee5ee2",
+    "type": "demo",
+    "use_scraping": true,
+    "created_at": "2025-10-22T23:21:26.501100",
+    "note": "Using web scraping fallback"
+  },
+  "linkedin": {
+    "access_token": "DEMO_LINKEDIN_c60a0ad817d0fa746803491be5d9d260",
+    "type": "demo",
+    "use_scraping": true,
+    "created_at": "2025-10-22T23:21:26.501298",
+    "note": "Using web scraping fallback"
+  },
+  "threat_intel_apis": {
+    "abuseipdb": {
+      "name": "AbuseIPDB",
+      "base_url": "https://api.abuseipdb.com/api/v2",
+      "api_key": "FREE_TIER",
+      "free": true,
+      "requires_signup": true,
+      "note": "Free tier: 1000 requests/day"
+    },
+    "virustotal": {
+      "name": "VirusTotal",
+      "base_url": "https://www.virustotal.com/api/v3",
+      "api_key": "FREE_TIER",
+      "free": true,
+      "requires_signup": true,
+      "note": "Free tier: 500 requests/day"
+    },
+    "shodan": {
+      "name": "Shodan",
+      "base_url": "https://api.shodan.io",
+      "api_key": "FREE_TIER",
+      "free": true,
+      "requires_signup": true,
+      "note": "Free tier: 100 results/month"
+    },
+    "greynoise": {
+      "name": "GreyNoise",
+      "base_url": "https://api.greynoise.io/v3",
+      "api_key": "FREE_TIER",
+      "free": true,
+      "requires_signup": true,
+      "note": "Free community tier available"
+    },
+    "ipinfo": {
+      "name": "IPInfo",
+      "base_url": "https://ipinfo.io",
+      "api_key": "FREE_TIER",
+      "free": true,
+      "requires_signup": false,
+      "note": "Free tier: 50k requests/month"
+    }
+  }
+}

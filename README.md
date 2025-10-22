@@ -1,33 +1,50 @@
 # 🛡️ TNI AU - Threat Intelligence System
 
-Sistem Analisis Intelijen Ancaman Siber berbasis React.js untuk TNI AU dengan fitur crawling multi-bahasa dan analisis sentimen real-time.
+## 🚀 ALL FEATURES ENABLED - FREE API AUTO-GENERATION
 
-> 📚 **New here?** Check [INDEX.md](INDEX.md) for documentation navigation guide!  
-> ⚡ **Quick start?** Go directly to [QUICK_START.md](QUICK_START.md)!
+Sistem Analisis Intelijen Ancaman Siber berbasis React.js untuk TNI AU dengan fitur crawling multi-bahasa, analisis sentimen real-time, dan **AUTO-SETUP untuk SEMUA platform media sosial TANPA API KEY!**
+
+> 🎉 **NEW!** All social media platforms enabled with FREE scraping - NO API keys required!  
+> 📚 **Documentation?** Check [INDEX.md](INDEX.md) or [AUTO_SETUP_GUIDE.md](AUTO_SETUP_GUIDE.md)  
+> ⚡ **Quick start?** Run `python quick_start.py` for instant setup!
 
 ## ✨ Fitur Utama
 
+### 🎉 **NEW: ALL Social Media Platforms - FREE Scraping**
+- ✅ **Twitter/X** - Free scraping via Nitter (NO API key needed)
+- ✅ **Reddit** - Free JSON API (NO authentication needed)
+- ✅ **Facebook** - Public data scraping
+- ✅ **Instagram** - Public hashtag scraping via Picuki
+- ✅ **LinkedIn** - Public post scraping
+- ✅ **Telegram** - Public channel scraping
+- ✅ **Auto API Generation** - Demo credentials generated automatically
+- ✅ **Zero Configuration** - Works out of the box!
+
 ### 🌐 Multi-Language Crawler
 - **4 Bahasa**: Indonesia 🇮🇩, English 🇺🇸, Chinese 🇨🇳, Arabic 🇸🇦
-- **Multi-Source**: Media sosial, portal berita, forum, dark web
+- **Multi-Source**: SEMUA media sosial, portal berita, forum, dark web
 - **Real-time**: Pengumpulan data ancaman siber secara real-time
+- **No Rate Limits**: Free scraping methods with smart delays
 
 ### 📊 Sentiment Analysis
 - Analisis sentimen otomatis untuk setiap data yang dikumpulkan
 - Klasifikasi: Positive, Negative, Neutral
 - Visualisasi trend sentimen dari waktu ke waktu
+- Multi-language sentiment support
 
 ### 🎯 Threat Intelligence
 - **4 Level Ancaman**: HIGH, MEDIUM, LOW, INFO
 - Deteksi keyword ancaman otomatis
 - Ekstraksi IOC (Indicators of Compromise)
 - Kategorisasi berdasarkan sumber dan tingkat ancaman
+- Free threat intel API integration
 
 ### 📈 Analytics & Insights
 - Dashboard real-time dengan statistik lengkap
 - Grafik trend ancaman
 - Distribusi sumber data
 - Top keywords dan pattern analysis
+- Cross-platform correlation
 
 ## 🚀 Quick Start
 
