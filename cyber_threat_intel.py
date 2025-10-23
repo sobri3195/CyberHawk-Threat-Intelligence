@@ -641,10 +641,10 @@ class ThreatIntelReporter:
         
         analysis = {
             'period': f'{days} days',
-            'total_events': df['count'].sum(),
-            'high_threats': df[df['threat_level'] == 'HIGH']['count'].sum(),
-            'avg_daily_events': df.groupby('date')['count'].sum().mean(),
-            'sentiment_trend': df['avg_sentiment'].mean(),
+            'total_events': int(df['count'].sum()) if not df.empty else 0,
+            'high_threats': int(df[df['threat_level'] == 'HIGH']['count'].sum()) if not df.empty else 0,
+            'avg_daily_events': float(df.groupby('date')['count'].sum().mean()) if not df.empty else 0.0,
+            'sentiment_trend': float(df['avg_sentiment'].mean()) if not df.empty else 0.0,
             'recommendations': []
         }
         
