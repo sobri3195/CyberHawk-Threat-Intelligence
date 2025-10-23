@@ -55,3 +55,22 @@ server.log
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Python reports
+test_report_*.json
+demo_report_*.json
+
+# API PIDs
+.flask_api.pid
+.node_api.pid
